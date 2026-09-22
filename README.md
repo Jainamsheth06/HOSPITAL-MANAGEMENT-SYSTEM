@@ -2,7 +2,7 @@
 
 A comprehensive Django-based Hospital Management System with multi-role access (Owner, Doctor, Patient, Receptionist).
 
-?? **[Live Website Link](https://MediNEXA.pythonanywhere.com)**
+?? **[MediNEXA](https://MediNEXA.pythonanywhere.com)**
 
 ## Features
 * **Superuser/Owner Dashboard:** Full control over hospital staff and operations.
