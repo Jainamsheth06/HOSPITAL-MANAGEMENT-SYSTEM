@@ -1,0 +1,89 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Register Doctor — Core HMS{% endblock %}
+{% block content %}
+<div class="form-card form-card-wide" style="margin-top:1rem;">
+    <div class="form-card-header">
+        <div>
+            <h2> Doctor Registration</h2>
+            <p>Register a new doctor into the system</p>
+        </div>
+        <a href="{% url 'dashboard_redirect' %}" class="btn btn-sm"> Back</a>
+    </div>
+
+    <form method="post" action="{% url 'doctor_register' %}">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="message error"> {{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div class="form-section-title"> Account Details</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>First Name *</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}<div class="form-error"> {{ form.first_name.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Last Name *</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}<div class="form-error"> {{ form.last_name.errors }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Username *</label>
+                {{ form.username }}
+                {% if form.username.errors %}<div class="form-error"> {{ form.username.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Email Address *</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="form-error"> {{ form.email.errors }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Password *</label>
+                {{ form.password }}
+                {% if form.password.errors %}<div class="form-error"> {{ form.password.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Confirm Password *</label>
+                {{ form.confirm_password }}
+                {% if form.confirm_password.errors %}<div class="form-error"> {{ form.confirm_password.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-section-title"> Professional Details</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Specialization *</label>
+                {{ form.specialization }}
+                {% if form.specialization.errors %}<div class="form-error"> {{ form.specialization.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Department (Optional)</label>
+                {{ form.department }}
+                {% if form.department.errors %}<div class="form-error"> {{ form.department.errors }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Phone Number</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}<div class="form-error"> {{ form.phone.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Consultation Fee (₹) *</label>
+                {{ form.consultation_fee }}
+                {% if form.consultation_fee.errors %}<div class="form-error"> {{ form.consultation_fee.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-card-actions">
+            <a href="{% url 'dashboard_redirect' %}" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary"> Register Doctor</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

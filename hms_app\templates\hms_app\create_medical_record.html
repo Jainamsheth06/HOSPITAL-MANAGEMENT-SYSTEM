@@ -1,0 +1,121 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Medical Record — Appointment #{{ appointment.id }} — Core HMS{% endblock %}
+{% block content %}
+
+<div class="page-hero">
+    <h2> Clinical Record Entry</h2>
+    <p>Appointment #{{ appointment.id }} &nbsp;·&nbsp; {{ appointment.appointment_date|date:"d M Y" }} at {{ appointment.time_slot|time:"H:i" }}</p>
+</div>
+
+<!-- Patient Context -->
+<div class="profile-card" style="margin-bottom:1.5rem;">
+    <div class="profile-avatar">{{ appointment.patient.user.first_name|first|default:"P" }}</div>
+    <div class="profile-info">
+        <h3>{{ appointment.patient.user.get_full_name|default:appointment.patient.user.username }}</h3>
+        <div class="pid">{{ appointment.patient.patient_id }}</div>
+        <div class="profile-meta">
+            <span class="profile-tag"> {{ appointment.patient.blood_group }}</span>
+            <span class="profile-tag"> {{ appointment.patient.get_gender_display }}</span>
+            <span class="profile-tag"> {{ appointment.patient.date_of_birth|date:"d M Y" }}</span>
+        </div>
+    </div>
+    <div style="margin-left:auto;text-align:right;">
+        <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.6px;">Consulting Doctor</div>
+        <div style="font-weight:700;color:var(--text-primary);margin-top:0.2rem;">Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}</div>
+        <div style="color:var(--teal);font-size:0.85rem;">₹{{ appointment.doctor.consultation_fee }} fee</div>
+    </div>
+</div>
+
+<!-- Record Form -->
+<div class="form-card form-card-wide">
+    <div class="form-card-header">
+        <div>
+            <h2> Diagnosis &amp; Prescription</h2>
+            <p>Enter clinical findings and prescription details</p>
+        </div>
+        <a href="{% url 'doctor_dashboard' %}" class="btn btn-sm"> Doctor Panel</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label> Presented Symptoms *</label>
+                {{ form.symptoms }}
+                <div class="form-error">{{ form.symptoms.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label> Clinical Diagnosis *</label>
+                {{ form.diagnosis }}
+                <div class="form-error">{{ form.diagnosis.errors }}</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label> Prescription / Medications &amp; Dosage *</label>
+            {{ form.prescription }}
+            <div class="form-hint">Include: medicine name, strength, frequency (e.g. 1-0-1), duration in days.</div>
+            <div class="form-error">{{ form.prescription.errors }}</div>
+        </div>
+
+        <div class="form-section-title"> Billing Details</div>
+        <div class="form-row cols-3">
+            <div class="form-group">
+                <label>Consultation Fee (₹)</label>
+                {{ form.consultation_fee }}
+                <div class="form-error">{{ form.consultation_fee.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Medicine / Pharmacy Fee (₹)</label>
+                {{ form.medicine_fee }}
+                <div class="form-error">{{ form.medicine_fee.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Follow-up Date (Optional)</label>
+                {{ form.follow_up_date }}
+                <div class="form-error">{{ form.follow_up_date.errors }}</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="check-label">
+                {{ form.is_paid }} &nbsp;  Mark Billing as Paid
+            </label>
+        </div>
+
+        <div class="form-card-actions">
+            <a href="{% url 'doctor_dashboard' %}" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary"> Save &amp; Generate Receipt</button>
+        </div>
+    </form>
+</div>
+
+<!-- Prior Patient History -->
+{% if patient_history %}
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Prior Medical History — {{ appointment.patient.patient_id }}</span>
+    </div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr><th>Date</th><th>Doctor</th><th>Symptoms</th><th>Diagnosis</th><th>Prescription</th></tr>
+            </thead>
+            <tbody>
+                {% for rec in patient_history %}
+                <tr>
+                    <td>{{ rec.created_at|date:"Y-m-d" }}</td>
+                    <td>Dr. {{ rec.appointment.doctor.user.last_name|default:rec.appointment.doctor.user.username }}</td>
+                    <td style="color:var(--text-muted);">{{ rec.symptoms }}</td>
+                    <td>{{ rec.diagnosis }}</td>
+                    <td><pre style="font-family:inherit;margin:0;white-space:pre-wrap;color:var(--text-muted);">{{ rec.prescription }}</pre></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

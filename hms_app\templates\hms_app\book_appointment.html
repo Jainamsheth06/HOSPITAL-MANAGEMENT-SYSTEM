@@ -1,0 +1,55 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Book Appointment — Core HMS{% endblock %}
+{% block content %}
+
+<div class="form-card">
+    <div class="form-card-header">
+        <div>
+            <h2> Book Doctor Appointment</h2>
+            <p>Schedule a new appointment for a patient</p>
+        </div>
+        <a href="{% url 'appointment_list' %}" class="btn btn-sm"> View All</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label> Select Patient *</label>
+            {{ form.patient }}
+            <div class="form-error">{{ form.patient.errors }}</div>
+        </div>
+
+        <div class="form-group">
+            <label> Select Doctor *</label>
+            {{ form.doctor }}
+            <div class="form-error">{{ form.doctor.errors }}</div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label> Appointment Date *</label>
+                {{ form.appointment_date }}
+                <div class="form-error">{{ form.appointment_date.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label> Time Slot *</label>
+                {{ form.time_slot }}
+                <div class="form-error">{{ form.time_slot.errors }}</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label> Reason for Visit / Symptoms</label>
+            {{ form.reason }}
+            <div class="form-error">{{ form.reason.errors }}</div>
+        </div>
+
+        <div class="form-card-actions">
+            <a href="{% url 'appointment_list' %}" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary"> Confirm Booking</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

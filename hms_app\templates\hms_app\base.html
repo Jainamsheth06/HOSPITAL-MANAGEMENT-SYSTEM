@@ -1,0 +1,189 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="description" content="Core Hospital Management System - Professional Healthcare Platform">
+    <title>{% block title %}Core HMS{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'hms_app/css/style.css' %}?v=10.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-brand">
+            <div class="brand-icon"></div>
+            <h1>CORE <span>HMS</span></h1>
+        </div>
+
+        {% if user.is_authenticated %}
+
+        <!-- Hamburger button (mobile only) -->
+        <button class="nav-hamburger" id="navHamburger" aria-label="Open navigation">
+            <span></span><span></span><span></span>
+        </button>
+
+        <!-- Tablet top-nav toggle (checkbox trick) -->
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" style="display:none;">
+        <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </label>
+
+        <!-- Nav used for BOTH tablet dropdown & desktop inline -->
+        <nav class="sidebar-nav" id="desktopNav">
+            <ul>
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'owner_dashboard' %}"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                    <li><a href="{% url 'patient_list' %}"><i class="fa-solid fa-users-medical"></i> Patients</a></li>
+
+                    <li><a href="{% url 'appointment_list' %}"><i class="fa-solid fa-calendar-check"></i> Appointments</a></li>
+                {% elif user.groups.all.0.name == 'Receptionists' %}
+                    <li><a href="{% url 'receptionist_dashboard' %}"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                    <li><a href="{% url 'doctor_list' %}"><i class="fa-solid fa-user-doctor"></i> Doctors</a></li>
+                    <li><a href="{% url 'patient_list' %}"><i class="fa-solid fa-users-medical"></i> Patients</a></li>
+                    <li class="dropdown">
+                        <a href="javascript:void(0)" class="dropbtn"><i class="fa-solid fa-address-card"></i> Register ▾</a>
+                        <div class="dropdown-content">
+                            <a href="{% url 'patient_register' %}">Register Patient</a>
+                            <a href="{% url 'doctor_register' %}">Register Doctor</a>
+                        </div>
+                    </li>
+                    <li><a href="{% url 'appointment_list' %}"><i class="fa-solid fa-calendar-check"></i> Appointments</a></li>
+                    <li><a href="{% url 'book_appointment' %}"><i class="fa-solid fa-calendar-plus"></i> Book Appt</a></li>
+                {% elif hasattr or user.groups.all.0.name == 'Doctors' %}
+                    <li><a href="{% url 'doctor_dashboard' %}"><i class="fa-solid fa-stethoscope"></i> Doctor Panel</a></li>
+                {% elif user.groups.all.0.name == 'Patients' %}
+                    <li><a href="{% url 'patient_dashboard' %}"><i class="fa-solid fa-laptop-medical"></i> My Portal</a></li>
+                {% endif %}
+                <li class="nav-logout"><a href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Logout ({{ user.username }})</a></li>
+            </ul>
+        </nav>
+
+        <!-- Mobile Side Drawer -->
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+        <nav class="mobile-drawer" id="mobileDrawer">
+            <div class="drawer-header">
+                <div class="drawer-brand">
+                    <div class="brand-icon"></div>
+                    <span>CORE <strong>HMS</strong></span>
+                </div>
+                <button class="drawer-close" id="drawerClose" aria-label="Close menu"></button>
+            </div>
+            <ul>
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'owner_dashboard' %}"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                    <li><a href="{% url 'patient_list' %}"><i class="fa-solid fa-users-medical"></i> Patients</a></li>
+                    <li><a href="{% url 'appointment_list' %}"><i class="fa-solid fa-calendar-check"></i> Appointments</a></li>
+                {% elif user.groups.all.0.name == 'Receptionists' %}
+                    <li><a href="{% url 'receptionist_dashboard' %}"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+                    <li><a href="{% url 'doctor_list' %}"><i class="fa-solid fa-user-doctor"></i> Doctors</a></li>
+                    <li><a href="{% url 'patient_list' %}"><i class="fa-solid fa-users-medical"></i> Patients</a></li>
+                    <li><a href="{% url 'patient_register' %}"><i class="fa-solid fa-user-plus"></i> Register Patient</a></li>
+                    <li><a href="{% url 'doctor_register' %}"><i class="fa-solid fa-user-doctor"></i> Register Doctor</a></li>
+                    <li><a href="{% url 'appointment_list' %}"><i class="fa-solid fa-calendar-check"></i> Appointments</a></li>
+                    <li><a href="{% url 'book_appointment' %}"><i class="fa-solid fa-calendar-plus"></i> Book Appointment</a></li>
+                {% elif hasattr or user.groups.all.0.name == 'Doctors' %}
+                    <li><a href="{% url 'doctor_dashboard' %}"><i class="fa-solid fa-stethoscope"></i> Doctor Panel</a></li>
+                {% elif user.groups.all.0.name == 'Patients' %}
+                    <li><a href="{% url 'patient_dashboard' %}"><i class="fa-solid fa-laptop-medical"></i> My Portal</a></li>
+                {% endif %}
+                <li class="nav-logout"><a href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket"></i> Logout ({{ user.username }})</a></li>
+            </ul>
+        </nav>
+
+        <script>
+        (function(){
+            var hamburger = document.getElementById('navHamburger');
+            var drawer    = document.getElementById('mobileDrawer');
+            var overlay   = document.getElementById('mobileOverlay');
+            var closeBtn  = document.getElementById('drawerClose');
+            function openDrawer(){
+                drawer.classList.add('open');
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeDrawer(){
+                drawer.classList.remove('open');
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            if(hamburger) hamburger.addEventListener('click', openDrawer);
+            if(closeBtn)  closeBtn.addEventListener('click', closeDrawer);
+            if(overlay)   overlay.addEventListener('click', closeDrawer);
+        })();
+        </script>
+
+        {% else %}
+        {% block auth_nav %}
+        <nav class="auth-nav">
+            <ul>
+                <li><a href="{% url 'login' %}" class="btn btn-primary">Sign In</a></li>
+            </ul>
+        </nav>
+        {% endblock %}
+        {% endif %}
+    </header>
+
+    <div class="container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {% if message.tags == 'success' %}{% elif message.tags == 'error' %}{% elif message.tags == 'warning' %}{% else %}{% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="main-footer">
+        <p>© 2026 <span style="color:var(--primary);">Core HMS</span> &nbsp;|&nbsp; Made By <span style="color:var(--teal);">Jainam</span> &nbsp;</p>
+    </footer>
+
+    {% if user.is_authenticated %}
+    <!-- Amazon-Style Bottom Nav for Mobile -->
+    <nav class="bottom-nav">
+        {% if user.role == 'DOCTOR' %}
+            <a href="{% url 'doctor_dashboard' %}" class="bottom-nav-item"><span class="icon"></span><span>Home</span></a>
+            <a href="{% url 'appointment_list' %}" class="bottom-nav-item"><span class="icon"></span><span>Schedule</span></a>
+            <a href="{% url 'patient_list' %}" class="bottom-nav-item"><span class="icon"></span><span>Patients</span></a>
+        {% elif user.role == 'RECEPTIONIST' %}
+            <a href="{% url 'receptionist_dashboard' %}" class="bottom-nav-item"><span class="icon"></span><span>Home</span></a>
+            <a href="{% url 'appointment_list' %}" class="bottom-nav-item"><span class="icon"></span><span>Appts</span></a>
+            <a href="{% url 'patient_list' %}" class="bottom-nav-item"><span class="icon"></span><span>Patients</span></a>
+        {% elif user.role == 'PATIENT' %}
+            <a href="{% url 'patient_dashboard' %}" class="bottom-nav-item"><span class="icon"></span><span>Home</span></a>
+            <a href="{% url 'book_appointment' %}" class="bottom-nav-item"><span class="icon"></span><span>Book</span></a>
+            <a href="{% url 'appointment_list' %}" class="bottom-nav-item"><span class="icon"></span><span>My Appts</span></a>
+        {% elif user.role == 'OWNER' %}
+            <a href="{% url 'owner_dashboard' %}" class="bottom-nav-item"><span class="icon"></span><span>Home</span></a>
+            <a href="{% url 'doctor_list' %}" class="bottom-nav-item"><span class="icon"></span><span>Doctors</span></a>
+            <a href="{% url 'appointment_list' %}" class="bottom-nav-item"><span class="icon"></span><span>Appts</span></a>
+        {% endif %}
+        <a href="{% url 'logout' %}" class="bottom-nav-item"><span class="icon"></span><span>Logout</span></a>
+    </nav>
+    {% endif %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('table.data-table').forEach(function(table) {
+            var headers = Array.from(table.querySelectorAll('thead th')).map(function(th) {
+                return th.textContent.trim();
+            });
+            if (headers.length > 0) {
+                table.querySelectorAll('tbody tr').forEach(function(tr) {
+                    Array.from(tr.children).forEach(function(td, idx) {
+                        if (headers[idx] && !td.hasAttribute('data-label')) {
+                            td.setAttribute('data-label', headers[idx]);
+                        }
+                    });
+                });
+            }
+        });
+    });
+    </script>
+</body>
+</html>

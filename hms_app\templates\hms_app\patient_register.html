@@ -1,0 +1,98 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Register Patient — Core HMS{% endblock %}
+{% block content %}
+
+<div class="form-card form-card-wide">
+    <div class="form-card-header">
+        <div>
+            <h2> New Patient Registration</h2>
+            <p>Fill in all details to register a new patient</p>
+        </div>
+        <a href="{% url 'patient_list' %}" class="btn btn-sm"> Patient Directory</a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-section-title"> Account Credentials</div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Username *</label>
+                {{ form.username }}
+                <div class="form-error">{{ form.username.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Email Address *</label>
+                {{ form.email }}
+                <div class="form-error">{{ form.email.errors }}</div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>First Name *</label>
+                {{ form.first_name }}
+                <div class="form-error">{{ form.first_name.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Last Name *</label>
+                {{ form.last_name }}
+                <div class="form-error">{{ form.last_name.errors }}</div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Password *</label>
+                {{ form.password }}
+                <div class="form-error">{{ form.password.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password *</label>
+                {{ form.confirm_password }}
+                <div class="form-error">{{ form.confirm_password.errors }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-title"> Clinical Profile</div>
+        <div class="form-row cols-3">
+            <div class="form-group">
+                <label>Date of Birth *</label>
+                {{ form.date_of_birth }}
+                <div class="form-error">{{ form.date_of_birth.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Gender *</label>
+                {{ form.gender }}
+                <div class="form-error">{{ form.gender.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Blood Group *</label>
+                {{ form.blood_group }}
+                <div class="form-error">{{ form.blood_group.errors }}</div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Phone Number</label>
+                {{ form.phone }}
+                <div class="form-error">{{ form.phone.errors }}</div>
+            </div>
+            <div class="form-group">
+                <label>Emergency Contact *</label>
+                {{ form.emergency_contact }}
+                <div class="form-error">{{ form.emergency_contact.errors }}</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Residential Address</label>
+            {{ form.address }}
+            <div class="form-error">{{ form.address.errors }}</div>
+        </div>
+
+        <div class="form-card-actions">
+            <a href="{% url 'patient_list' %}" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary"> Save Patient</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

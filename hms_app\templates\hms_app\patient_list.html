@@ -1,0 +1,86 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Patient Directory — Core HMS{% endblock %}
+{% block content %}
+
+<div class="page-hero">
+    <h2> Patient Directory</h2>
+    <p>Search and manage all registered patients</p>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title">All Registered Patients</span>
+        <a href="{% url 'patient_register' %}" class="btn btn-primary btn-sm"> Register New Patient</a>
+    </div>
+
+    <!-- Search Bar -->
+    <form method="get" action="{% url 'patient_list' %}">
+        <div class="search-bar">
+            <span style="color:var(--text-muted);"></span>
+            <input type="text" name="q" value="{{ query }}"
+                   placeholder="Search by Patient ID, Name, or Phone...">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+            {% if query %}
+            <a href="{% url 'patient_list' %}" class="btn btn-sm"> Clear</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if patients %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Full Name</th>
+                    <th>Gender</th>
+                    <th>DOB</th>
+                    <th>Blood Group</th>
+                    <th>Emergency Contact</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td data-label="Patient ID">
+                        <a href="{% url 'patient_detail' patient.id %}"
+                           style="color:var(--primary);font-weight:700;font-family:monospace;">
+                            {{ patient.patient_id }}
+                        </a>
+                    </td>
+                    <td data-label="Full Name"><strong>{{ patient.user.get_full_name|default:patient.user.username }}</strong></td>
+                    <td data-label="Gender" style="color:var(--text-muted);">{{ patient.get_gender_display }}</td>
+                    <td data-label="DOB" style="color:var(--text-muted);">{{ patient.date_of_birth|date:"Y-m-d" }}</td>
+                    <td data-label="Blood Group">
+                        <span class="badge badge-scheduled"> {{ patient.blood_group }}</span>
+                    </td>
+                    <td data-label="Emergency Contact" style="color:var(--text-muted);">{{ patient.emergency_contact }}</td>
+                    <td data-label="Actions">
+                        <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                            <a href="{% url 'patient_detail' patient.id %}" class="btn btn-sm"> Profile</a>
+                            <a href="{% url 'book_appointment' %}?patient_id={{ patient.id }}"
+                               class="btn btn-primary btn-sm"> Book</a>
+                            {% if user.is_superuser %}
+                            <form method="post" action="{% url 'delete_patient' patient.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Delete patient {{ patient.patient_id }}?');"></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"></div>
+        <p>No patients found{% if query %} for "{{ query }}"{% endif %}.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

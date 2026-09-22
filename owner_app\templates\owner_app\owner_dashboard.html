@@ -1,0 +1,362 @@
+{% extends 'hms_app/base.html' %}
+
+{% block title %}Owner Portal & Admin Command Center — MediNEXA{% endblock %}
+
+{% block content %}
+
+<!-- Executive Hero -->
+<div class="page-hero" style="background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%); border-bottom: 2px solid var(--border); padding: 2rem 1.5rem; margin-bottom: 2rem; border-radius: var(--radius-lg);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); padding: 0.25rem 0.75rem; border-radius: 9999px;">
+                    <span style="font-size: 0.85rem; color: #93c5fd; font-weight: 700;"><i class="fa-solid fa-crown"></i> SUPER ADMIN & OWNER PORTAL</span>
+                </div>
+                {% if owner_emails %}
+                    <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.25rem 0.75rem; border-radius: 9999px;">
+                        <span class="pulse-dot" style="background: #10b981;"></span>
+                        <span style="font-size: 0.8rem; color: #6ee7b7; font-weight: 600;"><i class="fa-solid fa-bell"></i> Direct Alerts Active: {{ owner_emails|join:", " }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            <h1 style="color: white; font-weight: 800; font-size: 2rem; margin: 0;">MediNEXA Hospital Command Center</h1>
+            <p style="color: rgba(255,255,255,0.8); margin-top: 0.4rem; font-size: 0.95rem;">Full visibility and management for Doctors, Patients, Assignments & Staff</p>
+        </div>
+        
+        <!-- Admin Quick Actions -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{% url 'doctor_register' %}" class="btn" style="background: #10b981; color: white; border: none; font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                 + Add Doctor
+            </a>
+            <a href="{% url 'patient_register' %}" class="btn" style="background: #3b82f6; color: white; border: none; font-weight: 600; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                 + Add Patient
+            </a>
+            <a href="{% url 'book_appointment' %}" class="btn" style="background: #f59e0b; color: #111827; border: none; font-weight: 700; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                 Assign Doctor
+            </a>
+            <a href="{% url 'receptionist_register' %}" class="btn" style="background: #8b5cf6; color: white; border: none; font-weight: 600;">
+                 + Add Receptionist
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Search Bar for Instant Hospital Query -->
+<div class="panel" style="margin-bottom: 2rem; background: var(--surface-2); border: 1px solid var(--border); padding: 1.25rem;">
+    <form method="get" action="{% url 'owner_dashboard' %}" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px; position: relative;">
+            <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder=" Search doctors, patients, IDs, phone numbers..." style="padding-left: 1rem; width: 100%;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-weight: 600;">Search</button>
+        {% if search_query %}
+            <a href="{% url 'owner_dashboard' %}" class="btn" style="background: var(--surface-3); color: var(--text-main);">Clear Filter</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Key Performance Indicators (KPIs) -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <!-- Revenue -->
+    <div class="stat-card" style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%); border-color: #059669;">
+        <div class="stat-icon" style="background: rgba(255,255,255,0.2); color: white;">₹</div>
+        <div class="stat-info">
+            <div class="stat-label" style="color: rgba(255,255,255,0.85);">Total Revenue</div>
+            <div class="stat-value" style="color: white; font-size: 1.85rem;">₹{{ total_revenue|floatformat:2 }}</div>
+        </div>
+    </div>
+    
+    <!-- Doctors -->
+    <div class="stat-card" style="border-left: 4px solid #10b981;">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;"></div>
+        <div class="stat-info">
+            <div class="stat-label">Registered Doctors</div>
+            <div class="stat-value">{{ doctors|length }}</div>
+        </div>
+    </div>
+    
+    <!-- Patients -->
+    <div class="stat-card" style="border-left: 4px solid #3b82f6;">
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"></div>
+        <div class="stat-info">
+            <div class="stat-label">Total Patients</div>
+            <div class="stat-value">{{ total_patients_count }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                <span style="color: #10b981; font-weight: 600;">{{ assigned_count }} Assigned</span> • 
+                <span style="color: #f59e0b; font-weight: 600;">{{ unassigned_count }} Unassigned</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Appointments -->
+    <div class="stat-card" style="border-left: 4px solid #f59e0b;">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;"></div>
+        <div class="stat-info">
+            <div class="stat-label">Total Appointments</div>
+            <div class="stat-value">{{ total_appointments_count }}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                <span style="color: #3b82f6; font-weight: 600;">{{ scheduled_count }} Scheduled</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff -->
+    <div class="stat-card" style="border-left: 4px solid #8b5cf6;">
+        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;"></div>
+        <div class="stat-info">
+            <div class="stat-label">Receptionists</div>
+            <div class="stat-value">{{ receptionists.count }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- SECTION 1: Patient Directory & Doctor Assignment Status -->
+<div class="panel" style="margin-bottom: 2.5rem;">
+    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="panel-title" style="font-size: 1.15rem; font-weight: 700;"><i class="fa-solid fa-users-viewfinder"></i> Patient Registrations & Doctor Assignment Tracker</span>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Check which patient is assigned to which doctor, consultation history, and assign doctors directly</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'patient_register' %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus"></i> Register Patient</a>
+            <a href="{% url 'patient_list' %}" class="btn btn-sm" style="background: var(--surface-3);">Full Patient List </a>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Patient ID & Name</th>
+                    <th>Contact & Details</th>
+                    <th>Assigned Doctor(s)</th>
+                    <th>Latest Status / Visit</th>
+                    <th style="text-align: right;">Admin Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in patients_data %}
+                <tr>
+                    <td data-label="Patient ID & Name">
+                        <strong style="color: var(--primary); font-size: 0.95rem;">{{ item.patient.patient_id }}</strong><br>
+                        <span style="font-weight: 700; color: var(--text-main);">{{ item.patient.user.get_full_name|default:item.patient.user.username }}</span>
+                    </td>
+                    <td data-label="Contact & Details">
+                        <div> {{ item.patient.phone|default:item.patient.emergency_contact|default:"No phone" }}</div>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">
+                             {{ item.patient.blood_group }} | {{ item.patient.get_gender_display }} (DOB: {{ item.patient.date_of_birth|date:"d M Y" }})
+                        </span>
+                    </td>
+                    <td data-label="Assigned Doctor(s)">
+                        {% if item.assigned_docs %}
+                            {% for doc in item.assigned_docs %}
+                                <div style="margin-bottom: 0.25rem;">
+                                    <span style="font-weight: 700; color: #10b981;"> Dr. {{ doc.user.get_full_name|default:doc.user.username }}</span>
+                                    <span style="font-size: 0.78rem; color: var(--text-muted); display: block;">
+                                        {{ doc.specialization }}{% if doc.department %} • {{ doc.department.name }}{% endif %}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.3);">
+                                 No Doctor Assigned
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Latest Status / Visit">
+                        {% if item.latest_apt %}
+                            <div>
+                                <span class="badge badge-{{ item.latest_apt.status|lower }}">{{ item.latest_apt.status }}</span>
+                            </div>
+                            <span style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                                 {{ item.latest_apt.appointment_date|date:"d M Y" }} at {{ item.latest_apt.time_slot|time:"H:i" }}
+                            </span>
+                        {% else %}
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">No visits recorded</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Admin Actions" style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end; flex-wrap: wrap;">
+                            <a href="{% url 'book_appointment' %}?patient_id={{ item.patient.id }}" class="btn btn-sm" style="background: #10b981; color: white; border: none; font-size: 0.8rem;" title="Assign / Book Appointment">
+                                 Assign Doctor
+                            </a>
+                            <a href="{% url 'patient_detail' item.patient.id %}" class="btn btn-sm" style="background: var(--surface-3); font-size: 0.8rem;" title="View History & Medical Records">
+                                 History
+                            </a>
+                            <form method="post" action="{% url 'delete_patient' item.patient.id %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete patient {{ item.patient.user.get_full_name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" style="font-size: 0.8rem;">
+                                    
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="5" style="text-align: center; padding: 2rem;">No registered patients found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SECTION 2: Doctor Registrations & Workload -->
+<div class="panel" style="margin-bottom: 2.5rem;">
+    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="panel-title" style="font-size: 1.15rem; font-weight: 700;"><i class="fa-solid fa-user-md"></i> Registered Doctors & Specializations</span>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">View all doctors, consultation fees, active appointments, and contact information</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'doctor_list' %}" class="btn btn-sm" style="background: var(--surface-3);">Full Doctor List </a>
+        </div>
+    </div>
+    <div class="ta            <thead>
+                <tr>
+                    <th>Doctor Name</th>
+                    <th>Department</th>
+                    <th>Consultation Fee</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in doctors %}
+                <tr>
+                    <td data-label="Doctor Name">
+                        <strong style="color: var(--text-main); font-size: 0.95rem;">Dr. {{ doc.user.get_full_name|default:doc.user.username }}</strong><br>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">{{ doc.phone|default:"N/A" }}</span>
+                    </td>
+                    <td data-label="Department">
+                        <span class="badge badge-active" style="margin-bottom: 0.2rem;">{{ doc.department.name|default:"General" }}</span>
+                    </td>
+                    <td data-label="Consultation Fee">
+                        <strong style="color: #10b981;">{{ doc.consultation_fee|floatformat:2 }}</strong>
+                    </td>
+                    <td data-label="Actions" style="text-align: right;">
+                        <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end;">
+                            <a href="{% url 'appointment_list' %}?doctor={{ doc.id }}" class="btn btn-sm" style="background: var(--surface-3); font-size: 0.8rem;">
+                                 Appointments
+                            </a>
+                            <form method="post" action="{% url 'delete_doctor' doc.id %}" style="display:inline;" onsubmit="return confirm('Delete Dr. {{ doc.user.get_full_name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" style="font-size: 0.8rem;">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="4" style="text-align: center; padding: 2rem;">No registered doctors found.</td>
+                </tr>egistered doctors found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SECTION 3 & 4: Appointments & Staff Split Grid -->
+<div class="form-row cols-2" style="gap: 1.5rem; display: flex; flex-wrap: wrap;">
+    
+    <!-- Real-time Appointments Overview -->
+    <div class="panel" style="flex: 1.4; min-width: 340px;">
+        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="panel-title" style="font-size: 1rem; font-weight: 700;"><i class="fa-solid fa-calendar-check"></i> Recent Appointments & Assignments</span>
+            <a href="{% url 'appointment_list' %}" class="btn btn-sm" style="background: var(--surface-3);">View All ({{ total_appointments_count }}) </a>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Patient</th>
+                        <th>Assigned Doctor</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apt in appointments %}
+                    <tr>
+                        <td data-label="Date & Time">
+                            <strong>{{ apt.appointment_date|date:"d M Y" }}</strong>
+                            <div style="font-size:0.8rem; color:var(--text-muted);">{{ apt.time_slot|time:"H:i" }}</div>
+                        </td>
+                        <td data-label="Patient">
+                            <strong>{{ apt.patient.user.get_full_name|default:apt.patient.user.username }}</strong><br>
+                            <span style="font-size: 0.78rem; color: var(--primary);">{{ apt.patient.patient_id }}</span>
+                        </td>
+                        <td data-label="Assigned Doctor">
+                            <strong>Dr. {{ apt.doctor.user.last_name|default:apt.doctor.user.username }}</strong><br>
+                            <span style="font-size: 0.78rem; color: var(--text-muted);">{{ apt.doctor.specialization }}</span>
+                        </td>
+                        <td data-label="Status">
+                            <span class="badge badge-{{ apt.status|lower }}">{{ apt.status }}</span>
+                        </td>
+                        <td data-label="Action">
+                            {% if apt.status == 'SCHEDULED' %}
+                                <a href="{% url 'cancel_appointment' apt.id %}" class="btn btn-sm btn-danger" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;" onclick="return confirm('Cancel this appointment?');">
+                                    Cancel
+                                </a>
+                            {% else %}
+                                <form method="post" action="{% url 'delete_appointment' apt.id %}" style="display:inline;" onsubmit="return confirm('Delete this record?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.5rem; background: var(--surface-3); color: var(--text-muted);">
+                                        Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row"><td colspan="5" style="text-align:center;">No appointments scheduled yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Staff & Receptionists Management -->
+    <div class="panel" style="flex: 1; min-width: 280px;">
+        <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="panel-title" style="font-size: 1rem; font-weight: 700;"><i class="fa-solid fa-users"></i> Receptionist Staff</span>
+        </div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Staff Username</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in receptionists %}
+                    <tr>
+                        <td data-label="Staff Username">
+                            <strong>{{ r.username }}</strong><br>
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ r.email|default:"No email" }}</span>
+                        </td>
+                        <td data-label="Status"><span class="badge badge-active"><span class="pulse-dot"></span>Active</span></td>
+                        <td data-label="Action">
+                            <form method="post" action="{% url 'delete_receptionist' r.id %}" style="display:inline;" onsubmit="return confirm('Delete receptionist {{ r.username }}? This revokes access.');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="empty-row"><td colspan="3" style="text-align:center;">No receptionists registered.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

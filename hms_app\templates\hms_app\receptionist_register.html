@@ -1,0 +1,66 @@
+{% extends 'hms_app/base.html' %}
+
+{% block title %}Register Receptionist — Core HMS{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card" style="max-width:520px;">
+        <div style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border);">
+            <h2 style="font-size:1.3rem;font-weight:800;color:var(--text-primary);"> Register Receptionist</h2>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem;">Create a new receptionist login account</p>
+        </div>
+
+        <form method="post" action="{% url 'receptionist_register' %}">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="message error"> {{ form.non_field_errors }}</div>{% endif %}
+
+            <div class="form-section-title"> Personal Information</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First Name *</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}<div class="form-error"> {{ form.first_name.errors }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name *</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}<div class="form-error"> {{ form.last_name.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username *</label>
+                {{ form.username }}
+                {% if form.username.errors %}<div class="form-error"> {{ form.username.errors }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email Address *</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="form-error"> {{ form.email.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-section-title"> Security</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Password *</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}<div class="form-error"> {{ form.password.errors }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.confirm_password.id_for_label }}">Confirm Password *</label>
+                    {{ form.confirm_password }}
+                    {% if form.confirm_password.errors %}<div class="form-error"> {{ form.confirm_password.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-card-actions">
+                {% if user.is_superuser %}
+                <a href="{% url 'owner_dashboard' %}" class="btn">Cancel</a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn"> Back to Login</a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary"> Register Receptionist</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Appointment Schedule — Core HMS{% endblock %}
+{% block content %}
+
+<div class="page-hero">
+    <h2> Master Appointment Schedule</h2>
+    <p>View, filter and manage all appointments</p>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title">All Appointments</span>
+        <a href="{% url 'book_appointment' %}" class="btn btn-primary btn-sm"> Book New</a>
+    </div>
+
+    <!-- Filter Bar -->
+    <form method="get" action="{% url 'appointment_list' %}">
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label> Filter by Date</label>
+                <input type="date" name="date" value="{{ date_filter }}" class="form-input">
+            </div>
+            <div class="filter-group">
+                <label> Filter by Doctor</label>
+                <select name="doctor" class="form-input">
+                    <option value="">All Doctors</option>
+                    {% for doc in doctors %}
+                    <option value="{{ doc.id }}" {% if doctor_filter == doc.id|stringformat:"i" %}selected{% endif %}>
+                        Dr. {{ doc.user.last_name|default:doc.user.username }} ({{ doc.specialization }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label> Filter by Status</label>
+                <select name="status" class="form-input">
+                    <option value="">All Statuses</option>
+                    <option value="SCHEDULED" {% if status_filter == 'SCHEDULED' %}selected{% endif %}>Scheduled</option>
+                    <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                    <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary"> Filter</button>
+                <a href="{% url 'appointment_list' %}" class="btn"> Reset</a>
+            </div>
+        </div>
+    </form>
+
+    {% if appointments %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>APT ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Specialization</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in appointments %}
+                <tr>
+                    <td data-label="APT ID"><strong style="color:var(--primary);">#{{ apt.id }}</strong></td>
+                    <td data-label="Date">{{ apt.appointment_date|date:"Y-m-d" }}</td>
+                    <td data-label="Time"><strong style="color:var(--amber);">{{ apt.time_slot|time:"H:i" }}</strong></td>
+                    <td data-label="Patient">
+                        <a href="{% url 'patient_detail' apt.patient.id %}" style="color:var(--primary);font-weight:600;">
+                            {{ apt.patient.patient_id }}
+                        </a><br>
+                        <small style="color:var(--text-muted);">{{ apt.patient.user.get_full_name|default:apt.patient.user.username }}</small>
+                    </td>
+                    <td data-label="Doctor">Dr. {{ apt.doctor.user.last_name|default:apt.doctor.user.username }}</td>
+                    <td data-label="Specialization" style="color:var(--text-muted);">{{ apt.doctor.specialization }}</td>
+                    <td data-label="Status"><span class="badge badge-{{ apt.status|lower }}">{{ apt.status }}</span></td>
+                    <td data-label="Actions">
+                        <div style="display:flex;gap:0.35rem;flex-wrap:wrap;justify-content:flex-end;">
+                            {% if apt.status == 'SCHEDULED' %}
+                            <a href="{% url 'cancel_appointment' apt.id %}" class="btn btn-danger btn-sm"
+                               onclick="return confirm('Cancel appointment #{{ apt.id }}?');">Cancel</a>
+                            {% elif apt.status == 'COMPLETED' and apt.medical_record %}
+                            <a href="{% url 'view_prescription' apt.medical_record.id %}" class="btn btn-sm"> Receipt</a>
+                            {% endif %}
+                            {% if user.is_superuser %}
+                            <form method="post" action="{% url 'delete_appointment' apt.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Permanently delete #{{ apt.id }}?');"></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"></div>
+        <p>No appointments match the selected filters.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

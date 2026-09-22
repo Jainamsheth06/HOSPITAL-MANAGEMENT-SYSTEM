@@ -1,0 +1,108 @@
+{% extends 'hms_app/base.html' %}
+
+{% block title %}Patient Portal — Core HMS{% endblock %}
+
+{% block content %}
+
+<!-- Profile Card -->
+<div class="profile-card">
+    <div class="profile-avatar">{{ patient.user.first_name|first|default:"P" }}</div>
+    <div class="profile-info">
+        <h3>{{ patient.user.get_full_name|default:patient.user.username }}</h3>
+        <div class="pid">{{ patient.patient_id }}</div>
+        <div class="profile-meta">
+            <span class="profile-tag"> {{ patient.blood_group }}</span>
+            <span class="profile-tag"> {{ patient.get_gender_display }}</span>
+            <span class="profile-tag"> {{ patient.date_of_birth|date:"d M Y" }}</span>
+            {% if patient.phone %}<span class="profile-tag"> {{ patient.phone }}</span>{% endif %}
+        </div>
+    </div>
+    <div style="margin-left:auto; text-align:right;">
+        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.6px;">Emergency Contact</div>
+        <div style="font-weight:600; color:var(--text-primary); margin-top:0.25rem;">{{ patient.emergency_contact }}</div>
+    </div>
+</div>
+
+<!-- Appointments -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Your Appointments</span>
+    </div>
+    {% if appointments %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>APT ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Doctor</th>
+                    <th>Specialization</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in appointments %}
+                <tr>
+                    <td data-label="APT ID" style="color:var(--text-muted);">#{{ apt.id }}</td>
+                    <td data-label="Date">{{ apt.appointment_date|date:"Y-m-d" }}</td>
+                    <td data-label="Time"><strong style="color:var(--primary);">{{ apt.time_slot|time:"H:i" }}</strong></td>
+                    <td data-label="Doctor">Dr. {{ apt.doctor.user.get_full_name|default:apt.doctor.user.username }}</td>
+                    <td data-label="Specialization" style="color:var(--text-muted);">{{ apt.doctor.specialization }}</td>
+                    <td data-label="Status"><span class="badge badge-{{ apt.status|lower }}">{{ apt.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon"></div><p>No appointments booked yet.</p></div>
+    {% endif %}
+</div>
+
+<!-- Medical History -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Medical History &amp; Prescriptions</span>
+    </div>
+    {% if medical_records %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Diagnosis</th>
+                    <th>Total Bill</th>
+                    <th>Payment</th>
+                    <th>Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in medical_records %}
+                <tr>
+                    <td data-label="Date">{{ rec.created_at|date:"Y-m-d" }}</td>
+                    <td data-label="Doctor">Dr. {{ rec.appointment.doctor.user.get_full_name|default:rec.appointment.doctor.user.username }}<br>
+                        <small style="color:var(--text-muted);">{{ rec.appointment.doctor.specialization }}</small>
+                    </td>
+                    <td data-label="Diagnosis">{{ rec.diagnosis }}</td>
+                    <td data-label="Total Bill"><strong style="color:var(--teal);">₹{{ rec.total_amount }}</strong></td>
+                    <td data-label="Payment">
+                        {% if rec.is_paid %}
+                        <span class="badge badge-paid"> PAID</span>
+                        {% else %}
+                        <span class="badge badge-pending"> PENDING</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Receipt"><a href="{% url 'view_prescription' rec.id %}" class="btn btn-sm"> View &amp; Print</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon"></div><p>No medical history available.</p></div>
+    {% endif %}
+</div>
+
+{% endblock %}

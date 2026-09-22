@@ -1,0 +1,130 @@
+{% extends 'hms_app/base.html' %}
+
+{% block title %}Doctor Panel — Core HMS{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+    <h2> Doctor Workspace</h2>
+    <p>Dr. {{ doctor.user.get_full_name|default:doctor.user.username }} &nbsp;·&nbsp; {{ doctor.specialization }} &nbsp;·&nbsp; {{ doctor.department.name|default:"General" }}</p>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card amber">
+        <div class="stat-icon"></div>
+        <div class="stat-info">
+            <div class="stat-label">Consultation Fee</div>
+            <div class="stat-value">₹{{ doctor.consultation_fee }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon"></div>
+        <div class="stat-info">
+            <div class="stat-label">Pending Appointments</div>
+            <div class="stat-value">{{ assigned_appointments|length }}</div>
+        </div>
+    </div>
+    <div class="stat-card teal">
+        <div class="stat-icon"></div>
+        <div class="stat-info">
+            <div class="stat-label">Prescriptions Written</div>
+            <div class="stat-value">{{ past_records|length }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Your Upcoming Appointments</span>
+    </div>
+    {% if assigned_appointments %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>APT ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient ID</th>
+                    <th>Patient Name</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in assigned_appointments %}
+                <tr>
+                    <td data-label="APT ID" style="color:var(--text-muted);">#{{ apt.id }}</td>
+                    <td data-label="Date">{{ apt.appointment_date|date:"Y-m-d" }}</td>
+                    <td data-label="Time"><strong style="color:var(--primary);">{{ apt.time_slot|time:"H:i" }}</strong></td>
+                    <td data-label="Patient ID"><strong style="color:var(--amber);">{{ apt.patient.patient_id }}</strong></td>
+                    <td data-label="Patient Name">{{ apt.patient.user.get_full_name|default:apt.patient.user.username }}</td>
+                    <td data-label="Reason" style="color:var(--text-muted);">{{ apt.reason|default:"General consultation" }}</td>
+                    <td data-label="Status"><span class="badge badge-{{ apt.status|lower }}">{{ apt.status }}</span></td>
+                    <td data-label="Action">
+                        {% if apt.status == 'SCHEDULED' %}
+                        <a href="{% url 'create_medical_record' apt.id %}" class="btn btn-primary btn-sm"> Write Prescription</a>
+                        {% elif apt.status == 'COMPLETED' and apt.medical_record %}
+                        <div style="display:flex; gap:0.4rem; justify-content:flex-end;">
+                            <a href="{% url 'create_medical_record' apt.id %}" class="btn btn-sm">Edit</a>
+                            <a href="{% url 'view_prescription' apt.medical_record.id %}" class="btn btn-sm"> Print</a>
+                        </div>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"></div>
+        <p>No pending appointments assigned to you.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Past Records -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Recent Clinical Records</span>
+    </div>
+    {% if past_records %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Record ID</th>
+                    <th>Date</th>
+                    <th>Patient</th>
+                    <th>Diagnosis</th>
+                    <th>Total Fee</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rec in past_records %}
+                <tr>
+                    <td data-label="Record ID"><span style="color:var(--primary);font-weight:600;">#REC-{{ rec.id }}</span></td>
+                    <td data-label="Date">{{ rec.created_at|date:"Y-m-d" }}</td>
+                    <td data-label="Patient">{{ rec.appointment.patient.patient_id }} — {{ rec.appointment.patient.user.get_full_name }}</td>
+                    <td data-label="Diagnosis">{{ rec.diagnosis }}</td>
+                    <td data-label="Total Fee"><strong style="color:var(--teal);">₹{{ rec.total_amount }}</strong></td>
+                    <td data-label="Action"><a href="{% url 'view_prescription' rec.id %}" class="btn btn-sm"> View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon"></div>
+        <p>No completed records yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

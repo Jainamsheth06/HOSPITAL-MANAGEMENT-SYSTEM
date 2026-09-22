@@ -1,0 +1,118 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Prescription &amp; Receipt #REC-{{ record.id }} — Core HMS{% endblock %}
+
+{% block content %}
+
+<div class="panel">
+    <div class="panel-header btn-no-print">
+        <span class="panel-title"> Medical Record &amp; Invoice — #REC-{{ record.id }}</span>
+        <div style="display:flex;gap:0.5rem;">
+            <button onclick="window.print()" class="btn btn-primary btn-sm"> Print / Download PDF</button>
+            <a href="{% url 'dashboard_redirect' %}" class="btn btn-sm"> Dashboard</a>
+        </div>
+    </div>
+
+    <div class="receipt-box">
+
+        <!-- Hospital Header -->
+        <div class="receipt-header">
+            <h2> CORE MEDICAL CENTER &amp; HOSPITAL</h2>
+            <p>100 Healthcare Boulevard, Clinical Tower &nbsp;•&nbsp; Tel: +91 1800-123-4567</p>
+            <p style="font-weight:700;margin-top:0.4rem;font-size:0.95rem;">
+                OFFICIAL CLINICAL PRESCRIPTION &amp; BILLING RECEIPT
+            </p>
+        </div>
+
+        <!-- Patient + Doctor Info -->
+        <table class="receipt-table" style="margin-bottom:1.25rem;">
+            <tr>
+                <td style="width:50%;vertical-align:top;padding:0.75rem;">
+                    <strong style="color:#0f4c81;">PATIENT DETAILS:</strong><br><br>
+                    <strong>ID:</strong> {{ patient.patient_id }}<br>
+                    <strong>Name:</strong> {{ patient.user.get_full_name|default:patient.user.username }}<br>
+                    <strong>DOB / Gender:</strong> {{ patient.date_of_birth|date:"Y-m-d" }} ({{ patient.get_gender_display }})<br>
+                    <strong>Blood Group:</strong> {{ patient.blood_group }}<br>
+                    <strong>Emergency:</strong> {{ patient.emergency_contact }}
+                </td>
+                <td style="width:50%;vertical-align:top;padding:0.75rem;">
+                    <strong style="color:#0f4c81;">ATTENDING DOCTOR:</strong><br><br>
+                    <strong>Name:</strong> Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}<br>
+                    <strong>Specialization:</strong> {{ doctor.specialization }}<br>
+                    <strong>Department:</strong> {{ doctor.department.name|default:"General Medicine" }}<br>
+                    <strong>Visit Date:</strong> {{ appointment.appointment_date|date:"Y-m-d" }} ({{ appointment.time_slot|time:"H:i" }})<br>
+                    <strong>Appointment ID:</strong> #{{ appointment.id }}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Symptoms & Diagnosis -->
+        <div class="receipt-section">
+            <div class="receipt-section-title">PRESENTED SYMPTOMS &amp; CLINICAL DIAGNOSIS</div>
+            <p><strong>Symptoms:</strong> {{ record.symptoms }}</p>
+            <p style="margin-top:0.4rem;"><strong>Diagnosis:</strong> {{ record.diagnosis }}</p>
+        </div>
+
+        <!-- Prescription -->
+        <div class="receipt-section">
+            <div class="receipt-section-title"> DIGITAL PRESCRIPTION &amp; MEDICATION ADVICE</div>
+            <div style="background:#f8f9fa;padding:0.85rem;border:1px solid #ddd;border-radius:4px;white-space:pre-wrap;font-family:monospace;font-size:0.875rem;">{{ record.prescription }}</div>
+        </div>
+
+        <!-- Follow-up -->
+        {% if record.follow_up_date %}
+        <div class="receipt-section">
+            <div class="receipt-section-title"> FOLLOW-UP RECOMMENDATION</div>
+            <p>Scheduled Follow-up Date: <strong>{{ record.follow_up_date|date:"Y-m-d" }}</strong></p>
+        </div>
+        {% endif %}
+
+        <!-- Billing -->
+        <div class="receipt-section">
+            <div class="receipt-section-title"> FINANCIAL SUMMARY &amp; RECEIPT</div>
+            <table class="receipt-table">
+                <thead>
+                    <tr>
+                        <th>Fee Description</th>
+                        <th style="text-align:right;">Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Doctor Consultation Charge</td>
+                        <td style="text-align:right;">₹{{ record.consultation_fee }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pharmacy &amp; Medicine Charges</td>
+                        <td style="text-align:right;">₹{{ record.medicine_fee }}</td>
+                    </tr>
+                    <tr style="font-weight:700;background:#e2e8f0;">
+                        <td>TOTAL CHARGES</td>
+                        <td style="text-align:right;">₹{{ record.total_amount }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top:0.75rem;font-weight:600;">
+                Payment Status:
+                {% if record.is_paid %}
+                <span style="color:green;"> PAID — RECEIPT CLEARED</span>
+                {% else %}
+                <span style="color:red;"> PENDING — PLEASE PAY AT CASHIER</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Signatures -->
+        <div class="receipt-signatures">
+            <div>
+                <p>___________________________</p>
+                <p>Patient Signature</p>
+            </div>
+            <div>
+                <p>___________________________</p>
+                <p>Dr. {{ doctor.user.last_name|default:doctor.user.username }} (Reg. No. {{ doctor.id }}902)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

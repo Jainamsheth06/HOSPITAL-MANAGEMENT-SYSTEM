@@ -1,0 +1,60 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Doctors Directory — Core HMS{% endblock %}
+{% block content %}
+
+<div class="page-hero">
+    <h2> Doctors Directory</h2>
+    <p>All registered doctors in the system</p>
+</div>
+
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title">Medical Staff</span>
+        <a href="{% url 'doctor_register' %}" class="btn btn-primary btn-sm"> Register New Doctor</a>
+    </div>
+
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Doctor Name</th>
+                    <th>Specialization</th>
+                    <th>Department</th>
+                    <th>Consultation Fee</th>
+                    <th>Contact</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in doctors %}
+                <tr>
+                    <td data-label="Doctor Name"><strong>Dr. {{ d.user.get_full_name|default:d.user.username }}</strong></td>
+                    <td data-label="Specialization">
+                        <span class="badge badge-scheduled">{{ d.specialization }}</span>
+                    </td>
+                    <td data-label="Department" style="color:var(--text-muted);">{{ d.department|default:"General" }}</td>
+                    <td data-label="Consultation Fee"><strong style="color:var(--teal);">₹{{ d.consultation_fee }}</strong></td>
+                    <td data-label="Contact" style="color:var(--text-muted);">{{ d.phone|default:"N/A" }}</td>
+                    <td data-label="Action">
+                        {% if user.is_superuser %}
+                        <form method="post" action="{% url 'delete_doctor' d.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Delete Dr. {{ d.user.last_name }}?');"> Delete</button>
+                        </form>
+                        {% else %}
+                        <span style="color:var(--text-muted); font-size:0.85rem;">View Only</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="empty-row">
+                    <td colspan="6">No doctors registered yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'hms_app/base.html' %}
+
+{% block title %}Executive Owner Sign In — MediNEXA{% endblock %}
+
+{% block auth_nav %}{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem;">
+    <div class="auth-card" style="max-width: 440px; width: 100%; background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 16px; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 25px rgba(245, 158, 11, 0.1); padding: 2.5rem 2rem;">
+        
+        <!-- Header & Crest -->
+        <div class="auth-logo" style="text-align: center; margin-bottom: 2rem;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 1rem auto; background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); color: white;">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <div style="display: inline-block; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.2rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                Executive Command
+            </div>
+            <h2 style="color: #ffffff; font-size: 1.5rem; font-weight: 800; margin: 0;">Owner Portal Sign In</h2>
+            <p style="color: #94a3b8; font-size: 0.875rem; margin-top: 0.4rem;">Hospital Owner & Super Administrator Access</p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 0.75rem; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1.25rem;">
+             {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'owner_login' %}">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="id_username" style="display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem;">
+                     Owner Username
+                </label>
+                <input type="text" name="username" id="id_username" class="form-input"
+                       placeholder="Enter owner username"
+                       value="{{ form.username.value|default:'' }}"
+                       autocomplete="username" required
+                       style="background: #1e293b; border: 1px solid #334155; color: white; width: 100%; border-radius: 8px; padding: 0.75rem 1rem;">
+                {% if form.username.errors %}<div class="form-error" style="color: #f87171; font-size: 0.8rem; margin-top: 0.3rem;"> {{ form.username.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="id_password" style="display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 0.4rem;">
+                     Security Password
+                </label>
+                <input type="password" name="password" id="id_password" class="form-input"
+                       placeholder="••••••••••••"
+                       autocomplete="current-password" required
+                       style="background: #1e293b; border: 1px solid #334155; color: white; width: 100%; border-radius: 8px; padding: 0.75rem 1rem;">
+                {% if form.password.errors %}<div class="form-error" style="color: #f87171; font-size: 0.8rem; margin-top: 0.3rem;"> {{ form.password.errors }}</div>{% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-block" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #0f172a; font-weight: 700; font-size: 1rem; padding: 0.85rem 1rem; border: none; border-radius: 8px; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); transition: transform 0.15s ease;">
+                 Secure Sign In
+            </button>
+        </form>
+
+        <div style="margin-top: 1.75rem; text-align: center; border-top: 1px solid #1e293b; padding-top: 1.25rem;">
+            <p style="font-size: 0.8rem; color: #64748b; margin: 0;">
+                 Restricted Area. Hospital Owner & Super Administrator credentials required.
+            </p>
+            <div style="margin-top: 0.75rem;">
+                <a href="{% url 'login' %}" style="font-size: 0.8rem; color: #94a3b8; text-decoration: none;"> Return to Staff / General Portal</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'hms_app/base.html' %}
+{% block title %}Patient Profile: {{ patient.patient_id }} — Core HMS{% endblock %}
+{% block content %}
+
+<!-- Profile Header Card -->
+<div class="profile-card">
+    <div class="profile-avatar">{{ patient.user.first_name|first|default:"P" }}</div>
+    <div class="profile-info">
+        <h3>{{ patient.user.get_full_name|default:patient.user.username }}</h3>
+        <div class="pid">{{ patient.patient_id }}</div>
+        <div class="profile-meta">
+            <span class="profile-tag"> {{ patient.blood_group }}</span>
+            <span class="profile-tag"> {{ patient.get_gender_display }}</span>
+            <span class="profile-tag"> {{ patient.date_of_birth|date:"d M Y" }}</span>
+            {% if patient.phone %}<span class="profile-tag"> {{ patient.phone }}</span>{% endif %}
+        </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;flex-shrink:0;flex-wrap:wrap;">
+        <a href="{% url 'book_appointment' %}?patient_id={{ patient.id }}" class="btn btn-primary btn-sm"> Book Appointment</a>
+        <a href="{% url 'patient_list' %}" class="btn btn-sm"> Directory</a>
+    </div>
+</div>
+
+<!-- Info Grid -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Patient Information</span>
+    </div>
+    <table class="info-table">
+        <tr>
+            <th>Patient ID</th>
+            <td><strong style="color:var(--primary);font-family:monospace;">{{ patient.patient_id }}</strong></td>
+            <th>Username</th>
+            <td>{{ patient.user.username }}</td>
+        </tr>
+        <tr>
+            <th>Full Name</th>
+            <td>{{ patient.user.get_full_name|default:"Not provided" }}</td>
+            <th>Email</th>
+            <td>{{ patient.user.email|default:"Not provided" }}</td>
+        </tr>
+        <tr>
+            <th>Date of Birth</th>
+            <td>{{ patient.date_of_birth|date:"Y-m-d" }}</td>
+            <th>Gender / Blood</th>
+            <td>{{ patient.get_gender_display }} / <strong style="color:var(--danger);">{{ patient.blood_group }}</strong></td>
+        </tr>
+        <tr>
+            <th>Phone</th>
+            <td>{{ patient.phone|default:"N/A" }}</td>
+            <th>Emergency Contact</th>
+            <td><strong>{{ patient.emergency_contact }}</strong></td>
+        </tr>
+        <tr>
+            <th>Address</th>
+            <td colspan="3">{{ patient.address|default:"N/A" }}</td>
+        </tr>
+    </table>
+</div>
+
+<!-- Appointments -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Appointments</span>
+    </div>
+    {% if appointments %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr><th>APT ID</th><th>Date</th><th>Time</th><th>Doctor</th><th>Specialization</th><th>Reason</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for apt in appointments %}
+                <tr>
+                    <td style="color:var(--text-muted);">#{{ apt.id }}</td>
+                    <td>{{ apt.appointment_date|date:"Y-m-d" }}</td>
+                    <td><strong style="color:var(--primary);">{{ apt.time_slot|time:"H:i" }}</strong></td>
+                    <td>Dr. {{ apt.doctor.user.last_name|default:apt.doctor.user.username }}</td>
+                    <td style="color:var(--text-muted);">{{ apt.doctor.specialization }}</td>
+                    <td style="color:var(--text-muted);">{{ apt.reason|default:"Routine Checkup" }}</td>
+                    <td><span class="badge badge-{{ apt.status|lower }}">{{ apt.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon"></div><p>No appointments recorded.</p></div>
+    {% endif %}
+</div>
+
+<!-- Medical Records -->
+<div class="panel">
+    <div class="panel-header">
+        <span class="panel-title"> Medical Records &amp; Prescriptions</span>
+    </div>
+    {% if medical_records %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr><th>Record ID</th><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Total Fee</th><th>Payment</th><th>Receipt</th></tr>
+            </thead>
+            <tbody>
+                {% for rec in medical_records %}
+                <tr>
+                    <td><span style="color:var(--primary);font-weight:600;">#REC-{{ rec.id }}</span></td>
+                    <td>{{ rec.created_at|date:"Y-m-d" }}</td>
+                    <td>Dr. {{ rec.appointment.doctor.user.last_name|default:rec.appointment.doctor.user.username }}</td>
+                    <td>{{ rec.diagnosis }}</td>
+                    <td><strong style="color:var(--teal);">₹{{ rec.total_amount }}</strong></td>
+                    <td>
+                        {% if rec.is_paid %}<span class="badge badge-paid"> PAID</span>
+                        {% else %}<span class="badge badge-pending"> PENDING</span>{% endif %}
+                    </td>
+                    <td><a href="{% url 'view_prescription' rec.id %}" class="btn btn-sm"> View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon"></div><p>No medical records available.</p></div>
+    {% endif %}
+</div>
+
+{% endblock %}

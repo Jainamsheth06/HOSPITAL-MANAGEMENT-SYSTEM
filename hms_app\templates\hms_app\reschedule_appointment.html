@@ -1,0 +1,43 @@
+{% extends 'hms_app/base.html' %}
+
+{% block title %}Reschedule Appointment #{{ appointment.id }} — Core HMS{% endblock %}
+
+{% block content %}
+<div class="page-hero" style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);">
+    <h2> Reschedule Appointment #{{ appointment.id }}</h2>
+    <p>Update appointment date, time slot, or assign a new doctor</p>
+</div>
+
+<div class="panel" style="max-width: 650px; margin: 0 auto;">
+    <div class="panel-header">
+        <span class="panel-title">Current Details</span>
+    </div>
+    
+    <div style="background: var(--surface-2); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; border: 1px solid var(--border);">
+        <p style="margin: 0 0 0.4rem 0;"><strong>Patient:</strong> {{ appointment.patient.user.get_full_name|default:appointment.patient.user.username }} (<code>{{ appointment.patient.patient_id }}</code>)</p>
+        <p style="margin: 0 0 0.4rem 0;"><strong>Current Doctor:</strong> Dr. {{ appointment.doctor.user.last_name|default:appointment.doctor.user.username }} ({{ appointment.doctor.specialization }})</p>
+        <p style="margin: 0;"><strong>Current Schedule:</strong> {{ appointment.appointment_date|date:"d M Y" }} at {{ appointment.time_slot|time:"H:i" }}</p>
+    </div>
+
+    <form method="post" action="{% url 'reschedule_appointment' appointment.id %}">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="form-error" style="color: var(--danger); font-size: 0.85rem; margin-top: 0.3rem;"> {{ field.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                 Confirm Reschedule & Send Notice
+            </button>
+            <a href="{% url 'appointment_list' %}" class="btn btn-lg" style="background: var(--surface-3);">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
